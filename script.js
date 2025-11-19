@@ -148,33 +148,45 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== FORMULARIO DE CONTACTO =====
     const contactForm = document.getElementById('contactForm');
 
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Obtener valores del formulario
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const message = document.getElementById('message').value;
-
-        // Validación básica
-        if (!name || !email || !message) {
-            showNotification('Por favor, completa todos los campos', 'error');
-            return;
-        }
-
-        // Validar email
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            showNotification('Por favor, introduce un email válido', 'error');
-            return;
-        }
-
-        // Aquí normalmente enviarías los datos a un servidor
-        // Por ahora, solo mostramos un mensaje de éxito
-        showNotification('¡Mensaje enviado con éxito! Te contactaré pronto.', 'success');
+    contactForm.addEventListener('submit', async function(e) {
+        // Si usas Formspree, el formulario se enviará automáticamente
+        // Este código solo agrega validación y mensajes personalizados
         
-        // Limpiar formulario
-        contactForm.reset();
+        const formAction = contactForm.getAttribute('action');
+        
+        // Si NO hay action configurado (sin Formspree), prevenir envío
+        if (!formAction || formAction.includes('mwpylzrq')) {
+            e.preventDefault();
+            
+            // Obtener valores del formulario
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            // Validación básica
+            if (!name || !email || !message) {
+                showNotification('Por favor, completa todos los campos', 'error');
+                return;
+            }
+
+            // Validar email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showNotification('Por favor, introduce un email válido', 'error');
+                return;
+            }
+
+            showNotification('⚠️ Configura Formspree para recibir emails reales. Ver instrucciones en README.md', 'error');
+            return;
+        }
+        
+        // Si Formspree está configurado, mostrar mensaje de carga
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Enviando...';
+        submitBtn.disabled = true;
+        
+        // El formulario se enviará normalmente a Formspree
     });
 
     // ===== SISTEMA DE NOTIFICACIONES =====
@@ -253,47 +265,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-// ===== ANIMACIÓN DEL TEXTO DEL HERO (CORREGIDO) =====
-const heroTitle = document.querySelector('.hero-title');
-if (heroTitle) {
-    // Extraer solo el texto, manteniendo la estructura HTML
-    const fullText = "Hola, soy ";
-    const highlightText = "Gonzalo"; // ← CAMBIA ESTO POR TU NOMBRE
-    
-    heroTitle.innerHTML = '';
-    let i = 0;
-    let j = 0;
-    let writingName = false;
+    // ===== ANIMACIÓN DEL TEXTO DEL HERO =====
+    const heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        const text = heroTitle.innerHTML;
+        heroTitle.innerHTML = '';
+        let i = 0;
 
-    function typeWriter() {
-        if (!writingName) {
-            // Escribir "Hola, soy "
-            if (i < fullText.length) {
-                heroTitle.innerHTML += fullText.charAt(i);
+        function typeWriter() {
+            if (i < text.length) {
+                heroTitle.innerHTML += text.charAt(i);
                 i++;
-                setTimeout(typeWriter, 50);
-            } else {
-                // Crear el span highlight
-                const span = document.createElement('span');
-                span.className = 'highlight';
-                heroTitle.appendChild(span);
-                writingName = true;
-                setTimeout(typeWriter, 50);
-            }
-        } else {
-            // Escribir el nombre dentro del span
-            if (j < highlightText.length) {
-                const span = heroTitle.querySelector('.highlight');
-                span.innerHTML += highlightText.charAt(j);
-                j++;
                 setTimeout(typeWriter, 50);
             }
         }
+
+        // Iniciar animación después de un pequeño delay
+        setTimeout(typeWriter, 500);
     }
 
-    // Iniciar animación después de un pequeño delay
-    setTimeout(typeWriter, 500);
-}
     // ===== CONTADOR DE SCROLL PROGRESS =====
     const scrollProgress = document.createElement('div');
     scrollProgress.style.cssText = `
@@ -313,13 +303,25 @@ if (heroTitle) {
         scrollProgress.style.width = scrolled + '%';
     });
 
-    // ===== EFECTO PARALLAX EN HERO =====
-    const hero = document.querySelector('.hero');
-    if (hero) {
-        window.addEventListener('scroll', function() {
-            const scrolled = window.pageYOffset;
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-        });
+    // ===== EFECTO PARALLAX EN HERO (DESACTIVADO) =====
+if (window.innerWidth > 768) {
+        const hero = document.querySelector('.hero-content');
+        const heroSection = document.querySelector('.hero');
+        
+        if (hero && heroSection) {
+            window.addEventListener('scroll', function() {
+                const scrolled = window.pageYOffset;
+                const heroHeight = heroSection.offsetHeight;
+                
+                // Solo aplicar parallax mientras el hero está visible
+                if (scrolled < heroHeight) {
+                    // Efecto más sutil (0.3 en lugar de 0.5)
+                    hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+                    // Añadir efecto de fade out gradual
+                    hero.style.opacity = 1 - (scrolled / heroHeight) * 0.5;
+                }
+            });
+        }
     }
 
     console.log('🚀 Portfolio cargado correctamente!');
