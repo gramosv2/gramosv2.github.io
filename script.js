@@ -121,72 +121,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ===== ANIMACIÓN DE APARICIÓN AL HACER SCROLL =====
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
-
-    // Observar elementos que deben animarse
-    const animatedElements = document.querySelectorAll('.project-card, .skill-tag');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(el);
-    });
-
-    // ===== FORMULARIO DE CONTACTO =====
+// ===== FORMULARIO DE CONTACTO =====
     const contactForm = document.getElementById('contactForm');
 
-    contactForm.addEventListener('submit', async function(e) {
-        // Si usas Formspree, el formulario se enviará automáticamente
-        // Este código solo agrega validación y mensajes personalizados
-        
-        const formAction = contactForm.getAttribute('action');
-        
-        // Si NO hay action configurado (sin Formspree), prevenir envío
-        if (!formAction || formAction.includes('mwpylzrq')) {
+    contactForm.addEventListener('submit', function(e) {
+        // Obtener valores del formulario
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const message = document.getElementById('message').value;
+
+        // Validación básica antes de enviar
+        if (!name || !email || !message) {
             e.preventDefault();
-            
-            // Obtener valores del formulario
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('message').value;
-
-            // Validación básica
-            if (!name || !email || !message) {
-                showNotification('Por favor, completa todos los campos', 'error');
-                return;
-            }
-
-            // Validar email
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                showNotification('Por favor, introduce un email válido', 'error');
-                return;
-            }
-
-            showNotification('⚠️ Configura Formspree para recibir emails reales. Ver instrucciones en README.md', 'error');
+            showNotification('Por favor, completa todos los campos', 'error');
             return;
         }
-        
-        // Si Formspree está configurado, mostrar mensaje de carga
+
+        // Validar email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            showNotification('Por favor, introduce un email válido', 'error');
+            return;
+        }
+
+        // Cambiar texto del botón mientras se envía
         const submitBtn = contactForm.querySelector('button[type="submit"]');
         const originalText = submitBtn.textContent;
         submitBtn.textContent = 'Enviando...';
         submitBtn.disabled = true;
+
+        // Mostrar notificación de éxito
+        showNotification('¡Mensaje enviado! Te contactaré pronto.', 'success');
         
-        // El formulario se enviará normalmente a Formspree
+        // Restaurar botón después de 2 segundos
+        setTimeout(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }, 2000);
+        
+        // El formulario se enviará automáticamente a Formspree (no preventDefault)
     });
 
     // ===== SISTEMA DE NOTIFICACIONES =====
