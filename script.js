@@ -151,18 +151,26 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.textContent = 'Enviando...';
         submitBtn.disabled = true;
 
-        // Mostrar notificación de éxito
-        showNotification('¡Mensaje enviado! Te contactaré pronto.', 'success');
-        
-        // Restaurar botón después de 2 segundos
+        // Limpiar formulario inmediatamente después de enviar
         setTimeout(() => {
+            contactForm.reset();
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
-        }, 2000);
+        }, 100);
         
         // El formulario se enviará automáticamente a Formspree (no preventDefault)
     });
 
+    // Limpiar formulario al volver de la página de confirmación de Formspree
+    window.addEventListener('pageshow', function(event) {
+        // Detectar si venimos de otra página (navegación hacia atrás)
+        if (event.persisted || performance.getEntriesByType('navigation')[0]?.type === 'back_forward') {
+            contactForm.reset();
+            const submitBtn = contactForm.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Enviar Mensaje';
+            submitBtn.disabled = false;
+        }
+    });
     // ===== SISTEMA DE NOTIFICACIONES =====
     function showNotification(message, type = 'success') {
         // Crear elemento de notificación
