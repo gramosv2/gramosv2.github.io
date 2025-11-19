@@ -266,23 +266,46 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===== ANIMACIÓN DEL TEXTO DEL HERO =====
-    const heroTitle = document.querySelector('.hero-title');
-    if (heroTitle) {
-        const text = heroTitle.innerHTML;
-        heroTitle.innerHTML = '';
-        let i = 0;
+const heroTitle = document.querySelector('.hero-title');
+if (heroTitle) {
+    // Extraer solo el texto, manteniendo la estructura HTML
+    const fullText = "Hola, soy ";
+    const highlightText = "Gonzalo"; // ← CAMBIA ESTO POR TU NOMBRE
+    
+    heroTitle.innerHTML = '';
+    let i = 0;
+    let j = 0;
+    let writingName = false;
 
-        function typeWriter() {
-            if (i < text.length) {
-                heroTitle.innerHTML += text.charAt(i);
+    function typeWriter() {
+        if (!writingName) {
+            // Escribir "Hola, soy "
+            if (i < fullText.length) {
+                heroTitle.innerHTML += fullText.charAt(i);
                 i++;
+                setTimeout(typeWriter, 50);
+            } else {
+                // Crear el span highlight
+                const span = document.createElement('span');
+                span.className = 'highlight';
+                heroTitle.appendChild(span);
+                writingName = true;
+                setTimeout(typeWriter, 50);
+            }
+        } else {
+            // Escribir el nombre dentro del span
+            if (j < highlightText.length) {
+                const span = heroTitle.querySelector('.highlight');
+                span.innerHTML += highlightText.charAt(j);
+                j++;
                 setTimeout(typeWriter, 50);
             }
         }
-
-        // Iniciar animación después de un pequeño delay
-        setTimeout(typeWriter, 500);
     }
+
+    // Iniciar animación después de un pequeño delay
+    setTimeout(typeWriter, 500);
+}
 
     // ===== CONTADOR DE SCROLL PROGRESS =====
     const scrollProgress = document.createElement('div');
